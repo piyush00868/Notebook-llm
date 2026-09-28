@@ -1,0 +1,55 @@
+// use prisma-8
+
+model User {
+  id         Int         @id @default(autoincrement())
+  email      String      @unique
+  username   String?
+  name       String?
+  workspaces Workspace[]
+  createdAt  TimestamptzString @default(now())
+  updatedAt  temporal.updatedAtString()
+}
+
+model Workspace {
+  id        Int       @id @default(autoincrement())
+  name      String
+  owner     User      @relation(fields: [ownerId], references: [id])
+  ownerId   Int
+  notebooks Notebook[]
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+}
+
+model Notebook {
+  id          Int       @id @default(autoincrement())
+  name        String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspaceId Int
+  documents   Document[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Document {
+  id          Int        @id @default(autoincrement())
+  title       String
+  sourceType  String
+  sourceUrl   String?
+  storageKey  String?
+  status      String
+  notebook    Notebook   @relation(fields: [notebookId], references: [id])
+  notebookId  Int
+  chunks      Chunk[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Chunk {
+  id         Int      @id @default(autoincrement())
+  content    String
+  chunkIndex Int
+  pineconeId String?
+  document   Document @relation(fields: [documentId], references: [id])
+  documentId Int
+  createdAt  TimestamptzString @default(now())
+}
