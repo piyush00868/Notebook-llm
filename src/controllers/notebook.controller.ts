@@ -1,7 +1,7 @@
 import type { Request } from "express";
 import type { Response } from "express";
 import { z } from "zod";
-import { createNotebook } from "../services/notebook.service";
+import { createNotebook, getNotebookById } from "../services/notebook.service";
 
 const createNotebookSchema = z.object({
   name: z.string().min(1),
@@ -33,3 +33,32 @@ export async function createNotebookController(
     });
   }
 }
+
+export async function getNotebookController(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Invalid notebook id",
+      });
+    }
+
+    const notebook = await getNotebookById(id);
+
+    if (!notebook) {
+      return res.status(404).json({
+        error: "Notebook not found",
+      });
+    }
+
+    return res.status(200).json(notebook);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Failed to get notebook",
+    });
+  }
+}
+
