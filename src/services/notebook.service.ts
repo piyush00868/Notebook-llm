@@ -13,3 +13,14 @@ export async function createNotebook(input: CreateNotebookInput) {
 
   return notebook;
 }
+
+export async function getNotebookById(id: number) {
+  const notebook = await db.orm.public.Notebook
+    .where({
+      id,
+    })
+    .include("documents")
+    .first();
+
+  return notebook;
+}
