@@ -33,6 +33,7 @@ model Notebook {
 model Document {
   id          Int        @id @default(autoincrement())
   title       String
+  content     String?
   sourceType  String
   sourceUrl   String?
   storageKey  String?
