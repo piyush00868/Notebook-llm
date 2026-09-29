@@ -13,3 +13,14 @@ export async function createWorkspace(input: CreateWorkspaceInput) {
 
   return workspace;
 }
+
+export async function getWorkspaceById(id: number) {
+  const workspace = await db.orm.public.Workspace
+    .where({
+      id,
+    })
+    .include("notebooks")
+    .first();
+
+  return workspace;
+}
