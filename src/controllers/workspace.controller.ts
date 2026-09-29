@@ -1,7 +1,7 @@
 import type { Request } from "express";
 import type { Response } from "express";
 import { z } from "zod";
-import { createWorkspace } from "../services/workspace.service";
+import { createWorkspace,getWorkspaceById } from "../services/workspace.service";
 
 const createWorkspaceSchema = z.object({
   name: z.string().min(1),
@@ -30,6 +30,34 @@ export async function createWorkspaceController(
 
     return res.status(500).json({
       error: "Failed to create workspace",
+    });
+  }
+}
+
+export async function getWorkspaceController(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Invalid workspace id",
+      });
+    }
+
+    const workspace = await getWorkspaceById(id);
+
+    if (!workspace) {
+      return res.status(404).json({
+        error: "Workspace not found",
+      });
+    }
+
+    return res.status(200).json(workspace);
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      error: "Failed to get workspace",
     });
   }
 }
