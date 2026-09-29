@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.Document.content",
+    "label": "Add column \"content\" to \"Document\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "content",
+        "table": "Document"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"content\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Document",
+          "content"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"content\"",
+        "sql": "ALTER TABLE \"public\".\"Document\" ADD COLUMN \"content\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"content\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Document",
+          "content"
+        ]
+      }
+    ]
+  }
+]
