@@ -355,6 +355,13 @@
           },
           "User": {
             "fields": {
+              "clerkUserId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "createdAt": {
                 "nullable": false,
                 "type": {
@@ -417,6 +424,9 @@
             },
             "storage": {
               "fields": {
+                "clerkUserId": {
+                  "column": "clerkUserId"
+                },
                 "createdAt": {
                   "column": "createdAt"
                 },
@@ -787,6 +797,11 @@
             },
             "User": {
               "columns": {
+                "clerkUserId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "createdAt": {
                   "codecId": "pg/timestamptz-string@1",
                   "default": {
@@ -834,6 +849,11 @@
                 ]
               },
               "uniques": [
+                {
+                  "columns": [
+                    "clerkUserId"
+                  ]
+                },
                 {
                   "columns": [
                     "email"
@@ -918,7 +938,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "445e11c2ccdf0b99b17b98dda9b65c5c9807b5774026a3d0d1c186ea407c0cfa"
+    "storageHash": "13891df9e5b24d3817f808a9e69a8ee2880d2dc88811e77a3ef264af490fba67"
   },
   "execution": {
     "executionHash": "c9df51ffd67efc2e542645c196ea30acf88bf18d0200998dc217f9bd4db12bfb",

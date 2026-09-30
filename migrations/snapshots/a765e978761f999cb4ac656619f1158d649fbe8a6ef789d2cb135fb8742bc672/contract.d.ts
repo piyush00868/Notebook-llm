@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'13891df9e5b24d3817f808a9e69a8ee2880d2dc88811e77a3ef264af490fba67'>;
+  StorageHashBase<'a765e978761f999cb4ac656619f1158d649fbe8a6ef789d2cb135fb8742bc672'>;
 export type ExecutionHash =
   ExecutionHashBase<'c9df51ffd67efc2e542645c196ea30acf88bf18d0200998dc217f9bd4db12bfb'>;
 export type ProfileHash =
@@ -278,7 +278,7 @@ export type FieldOutputTypes = {
       readonly workspaceId: CodecTypes['pg/int4@1']['output'];
     };
     readonly User: {
-      readonly clerkUserId: CodecTypes['pg/text@1']['output'] | null;
+      readonly clerkUserId: CodecTypes['pg/text@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
@@ -325,7 +325,7 @@ export type FieldInputTypes = {
       readonly workspaceId: CodecTypes['pg/int4@1']['input'];
     };
     readonly User: {
-      readonly clerkUserId: CodecTypes['pg/text@1']['input'] | null;
+      readonly clerkUserId: CodecTypes['pg/text@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -372,7 +372,7 @@ export type StorageColumnTypes = {
       readonly workspaceId: CodecTypes['pg/int4@1']['output'];
     };
     readonly User: {
-      readonly clerkUserId: CodecTypes['pg/text@1']['output'] | null;
+      readonly clerkUserId: CodecTypes['pg/text@1']['output'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly email: CodecTypes['pg/text@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
@@ -419,7 +419,7 @@ export type StorageColumnInputTypes = {
       readonly workspaceId: CodecTypes['pg/int4@1']['input'];
     };
     readonly User: {
-      readonly clerkUserId: CodecTypes['pg/text@1']['input'] | null;
+      readonly clerkUserId: CodecTypes['pg/text@1']['input'];
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly email: CodecTypes['pg/text@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
@@ -474,7 +474,7 @@ export namespace Models {
     readonly [RelationKeys]?: 'documents' | 'workspace';
   };
   export type public_User = {
-    clerkUserId: CodecTypes['pg/text@1']['output'] | null;
+    clerkUserId: CodecTypes['pg/text@1']['output'];
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     email: CodecTypes['pg/text@1']['output'];
     id: CodecTypes['pg/int4@1']['output'];
@@ -733,7 +733,7 @@ type ContractBase = Omit<
                 readonly clerkUserId: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
+                  readonly nullable: false;
                 };
                 readonly createdAt: {
                   readonly nativeType: 'timestamptz';
@@ -1075,7 +1075,7 @@ type ContractBase = Omit<
           readonly User: {
             readonly fields: {
               readonly clerkUserId: {
-                readonly nullable: true;
+                readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly createdAt: {

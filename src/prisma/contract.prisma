@@ -1,15 +1,15 @@
 // use prisma-8
 
 model User {
-  id         Int         @id @default(autoincrement())
-  email      String      @unique
-  username   String?
-  name       String?
-  workspaces Workspace[]
-  createdAt  TimestamptzString @default(now())
-  updatedAt  temporal.updatedAtString()
+  id          Int         @id @default(autoincrement())
+  clerkUserId String?      @unique
+  email       String      @unique
+  username    String?
+  name        String?
+  workspaces  Workspace[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
 }
-
 model Workspace {
   id        Int       @id @default(autoincrement())
   name      String
