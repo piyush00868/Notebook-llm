@@ -1,47 +1,40 @@
-import type { Response } from "express";
-import type { Request } from "express";
-import { z } from "zod";
-import { createUser } from "../services/user.service";
+import type { Request, Response } from "express";
+import { getAuth, clerkClient } from "@clerk/express";
+import { syncCurrentUser } from "../services/auth.service";
 
-const createUserSchema = z.object({
-  email: z.email(),
-  username: z.string().min(3),
-  name: z.string().min(1),
-});
-
-export async function createUserController(
+export async function getCurrentUserController(
   req: Request,
-  res: Response
+  res: Response,
 ) {
   try {
-    const result = createUserSchema.safeParse(req.body);
+    const { userId } = getAuth(req);
 
-    if (!result.success) {
-      return res.status(400).json({
-        error: "Invalid request data",
-        details: result.error,
+    if (!userId) {
+      return res.status(401).json({
+        error: "Unauthorized",
       });
     }
 
-    const user = await createUser(result.data);
+    const clerkUser = await clerkClient.users.getUser(userId);
 
-    return res.status(201).json(user);
+    const primaryEmail = clerkUser.emailAddresses.find(
+      (email) => email.id === clerkUser.primaryEmailAddressId,
+    );
+
+    if (!primaryEmail) {
+      return res.status(400).json({
+        error: "Clerk user has no primary email",
+      });
+    }
+
+    const user = await syncCurrentUser(userId);
+
+    return res.status(200).json(user);
   } catch (error) {
     console.error(error);
 
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "sqlState" in error &&
-      error.sqlState === "23505"
-    ) {
-      return res.status(409).json({
-        error: "Email already exists",
-      });
-    }
-
     return res.status(500).json({
-      error: "Failed to create user",
+      error: "Failed to sync user",
     });
   }
 }
