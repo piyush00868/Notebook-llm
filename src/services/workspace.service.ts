@@ -19,6 +19,7 @@ export async function getWorkspaceById(id: number) {
     .where({
       id,
     })
+    .include("owner")
     .include("notebooks")
     .first();
 
