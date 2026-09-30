@@ -1,18 +1,27 @@
-import type { Request } from "express";
-import type { Response } from "express";
+import type { Request, Response } from "express";
 import { z } from "zod";
-import { createWorkspace,getWorkspaceById } from "../services/workspace.service";
+import { getAuth } from "@clerk/express";
+import { assertOwner } from "../services/authorization.service";
+import {
+  createWorkspace,
+  getWorkspaceById,
+} from "../services/workspace.service";
+import { syncCurrentUser } from "../services/auth.service";
 
 const createWorkspaceSchema = z.object({
   name: z.string().min(1),
-  ownerId: z.number().int().positive(),
 });
 
-export async function createWorkspaceController(
-  req: Request,
-  res: Response
-) {
+export async function createWorkspaceController(req: Request, res: Response) {
   try {
+    const { userId } = getAuth(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        error: "Unauthorized",
+      });
+    }
+
     const result = createWorkspaceSchema.safeParse(req.body);
 
     if (!result.success) {
@@ -22,7 +31,12 @@ export async function createWorkspaceController(
       });
     }
 
-    const workspace = await createWorkspace(result.data);
+    const user = await syncCurrentUser(userId);
+
+    const workspace = await createWorkspace({
+      name: result.data.name,
+      ownerId: user.id,
+    });
 
     return res.status(201).json(workspace);
   } catch (error) {
@@ -35,6 +49,14 @@ export async function createWorkspaceController(
 }
 
 export async function getWorkspaceController(req: Request, res: Response) {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
   try {
     const id = Number(req.params.id);
 
@@ -49,6 +71,13 @@ export async function getWorkspaceController(req: Request, res: Response) {
     if (!workspace) {
       return res.status(404).json({
         error: "Workspace not found",
+      });
+    }
+    try {
+      assertOwner(workspace.owner.clerkUserId, userId);
+    } catch {
+      return res.status(403).json({
+        error: "Forbidden",
       });
     }
 
