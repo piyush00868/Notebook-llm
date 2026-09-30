@@ -1,8 +1,11 @@
 import { Router } from "express";
-import { createUserController } from "../controllers/user.controller";
+import { requireAuth } from "../middleware/auth.middleware";
+import { getCurrentUserController } from "../controllers/user.controller";
 
 const router = Router();
 
-router.post("/", createUserController);
+router.use(requireAuth);
+
+router.get("/me", getCurrentUserController);
 
 export default router;
