@@ -19,7 +19,10 @@ export async function getNotebookById(id: number) {
     .where({
       id,
     })
-    .include("documents")
+.include("workspace", (workspace) =>
+  workspace.include("owner"),
+)
+.include("documents")
     .first();
 
   return notebook;
