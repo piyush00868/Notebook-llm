@@ -20,14 +20,44 @@ export async function createDocument(input: CreateDocumentInput) {
 
   return document;
 }
-
 export async function getDocumentById(id: number) {
   const document = await db.orm.public.Document
     .where({
       id,
     })
+    .include("notebook", (notebook) =>
+      notebook.include("workspace", (workspace) =>
+        workspace.include("owner"),
+      ),
+    )
     .include("chunks")
     .first();
+
+  return document;
+}
+
+export async function deleteDocument(id: number) {
+  const document = await db.orm.public.Document
+    .where({
+      id,
+    })
+    .first();
+
+  if (!document) {
+    return null;
+  }
+
+  await db.orm.public.Chunk
+    .where({
+      documentId: id,
+    })
+    .delete();
+
+  await db.orm.public.Document
+    .where({
+      id,
+    })
+    .delete();
 
   return document;
 }
