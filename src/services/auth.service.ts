@@ -8,12 +8,14 @@ export async function getCurrentUser(clerkUserId: string) {
 }
 
 export async function syncCurrentUser(clerkUserId: string) {
+  // 1. Check whether this Clerk user is already linked.
   const existingUser = await getCurrentUser(clerkUserId);
 
   if (existingUser) {
     return existingUser;
   }
 
+  // 2. Get the user from Clerk.
   const clerkUser = await clerkClient.users.getUser(clerkUserId);
 
   const primaryEmail = clerkUser.emailAddresses.find(

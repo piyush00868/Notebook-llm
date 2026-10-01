@@ -1,5 +1,5 @@
-import type { Request, Response, NextFunction } from "express";
 import { getAuth } from "@clerk/express";
+import type { NextFunction, Request, Response } from "express";
 
 export function requireAuth(
   req: Request,

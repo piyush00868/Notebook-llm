@@ -31,7 +31,7 @@ export async function createWorkspaceController(req: Request, res: Response) {
       });
     }
 
-    const user = await syncCurrentUser(userId);
+const user = await syncCurrentUser(userId);
 
 if (!user) {
   return res.status(500).json({
@@ -39,10 +39,10 @@ if (!user) {
   });
 }
 
-    const workspace = await createWorkspace({
-      name: result.data.name,
-      ownerId: user.id,
-    });
+const workspace = await createWorkspace({
+  name: result.data.name,
+  ownerId: user.id,
+});
 
     return res.status(201).json(workspace);
   } catch (error) {
