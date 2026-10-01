@@ -24,6 +24,26 @@ export async function syncCurrentUser(clerkUserId: string) {
     throw new Error("Clerk user has no primary email");
   }
 
+  // 3. Check whether we already have a database user
+  // with this email.
+  const existingEmailUser = await db.orm.public.User
+    .where({
+      email: primaryEmail.emailAddress,
+    })
+    .first();
+
+  // 4. Link the existing database user to Clerk.
+  if (existingEmailUser) {
+    return db.orm.public.User
+      .where({
+        id: existingEmailUser.id,
+      })
+      .update({
+        clerkUserId,
+      });
+  }
+
+  // 5. No existing user -> create a new one.
   return db.orm.public.User.create({
     clerkUserId,
     email: primaryEmail.emailAddress,
