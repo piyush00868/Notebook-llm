@@ -33,6 +33,12 @@ export async function createWorkspaceController(req: Request, res: Response) {
 
     const user = await syncCurrentUser(userId);
 
+if (!user) {
+  return res.status(500).json({
+    error: "Failed to synchronize user",
+  });
+}
+
     const workspace = await createWorkspace({
       name: result.data.name,
       ownerId: user.id,
