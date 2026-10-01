@@ -14,10 +14,10 @@ const createDocumentSchema = z.object({
   sourceType: z.enum(["PDF", "WEB", "YOUTUBE", "TEXT"]),
   sourceUrl: z.string().url().optional(),
   storageKey: z.string().min(1).optional(),
+  content: z.string().optional(),
   status: z.enum(["PENDING", "PROCESSING", "COMPLETED", "FAILED"]),
   notebookId: z.number().int().positive(),
 });
-
 export async function createDocumentController(
   req: Request,
   res: Response,
