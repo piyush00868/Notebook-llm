@@ -5,6 +5,7 @@ type CreateDocumentInput = {
   sourceType: string;
   sourceUrl?: string | undefined;
   storageKey?: string | undefined;
+  content?: string | undefined;
   status: string;
   notebookId: number;
 };
@@ -14,6 +15,7 @@ export async function createDocument(input: CreateDocumentInput) {
     sourceType: input.sourceType,
     sourceUrl: input.sourceUrl ?? null,
     storageKey: input.storageKey ?? null,
+    content: input.content ?? null,
     status: input.status,
     notebookId: input.notebookId,
   });
