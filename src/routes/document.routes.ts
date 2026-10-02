@@ -1,9 +1,12 @@
 import { Router } from "express";
-import { createDocumentController, getDocumentController,deleteDocumentController } from "../controllers/document.controller";
+import { createDocumentController, getDocumentController,deleteDocumentController,uploadPdfController, chunkDocumentController } from "../controllers/document.controller";
 import { requireAuth } from "../middleware/auth.middleware";
+import { uploadPdf } from "../middleware/upload.middleware";
 const router = Router();
 router.use(requireAuth);
 router.post("/", createDocumentController);
 router.get("/:id", getDocumentController);
+router.post("/upload", uploadPdf.single("file"), uploadPdfController);
 router.delete("/:id", deleteDocumentController);
+router.post("/:id/chunks", chunkDocumentController);
 export default router;
