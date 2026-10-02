@@ -17,7 +17,15 @@ const createDocumentSchema = z.object({
   content: z.string().optional(),
   status: z.enum(["PENDING", "PROCESSING", "COMPLETED", "FAILED"]),
   notebookId: z.number().int().positive(),
-});
+}).superRefine((data, ctx) => {
+  if (data.sourceType === "TEXT" && !data.content?.trim()) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["content"],
+      message: "Content is required for TEXT documents",
+    });
+  }
+}); 
 export async function createDocumentController(
   req: Request,
   res: Response,
@@ -53,8 +61,10 @@ export async function createDocumentController(
         error: "Notebook workspace not found",
       });
     }
+    
 
 try {
+
   assertOwner(notebook.workspace.owner.clerkUserId, userId);
 } catch {
   return res.status(403).json({
