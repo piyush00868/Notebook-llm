@@ -23,7 +23,11 @@ model Workspace {
 model Notebook {
   id          Int       @id @default(autoincrement())
   name        String
-  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  workspace   Workspace @relation(
+    fields: [workspaceId],
+    references: [id],
+    onDelete: Cascade
+  )
   workspaceId Int
   documents   Document[]
   createdAt   TimestamptzString @default(now())
@@ -38,7 +42,11 @@ model Document {
   sourceUrl   String?
   storageKey  String?
   status      String
-  notebook    Notebook   @relation(fields: [notebookId], references: [id])
+  notebook    Notebook   @relation(
+    fields: [notebookId],
+    references: [id],
+    onDelete: Cascade
+  )
   notebookId  Int
   chunks      Chunk[]
   createdAt   TimestamptzString @default(now())
@@ -50,7 +58,11 @@ model Chunk {
   content    String
   chunkIndex Int
   pineconeId String?
-  document   Document @relation(fields: [documentId], references: [id])
+  document   Document @relation(
+    fields: [documentId],
+    references: [id],
+    onDelete: Cascade
+  )
   documentId Int
   createdAt  TimestamptzString @default(now())
 }
