@@ -9,13 +9,26 @@ type CreateDocumentInput = {
   status: string;
   notebookId: number;
 };
+
+function normalizeText(content: string) {
+  return content
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 export async function createDocument(input: CreateDocumentInput) {
+  const content = input.content
+    ? normalizeText(input.content)
+    : null;
+
   const document = await db.orm.public.Document.create({
     title: input.title,
     sourceType: input.sourceType,
     sourceUrl: input.sourceUrl ?? null,
     storageKey: input.storageKey ?? null,
-    content: input.content ?? null,
+    content,
     status: input.status,
     notebookId: input.notebookId,
   });
