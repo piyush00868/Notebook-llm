@@ -25,3 +25,23 @@ export async function getWorkspaceById(id: number) {
 
   return workspace;
 }
+
+export async function deleteWorkspace(id: number) {
+  const workspace = await db.orm.public.Workspace
+    .where({
+      id,
+    })
+    .first();
+
+  if (!workspace) {
+    return null;
+  }
+
+  await db.orm.public.Workspace
+    .where({
+      id,
+    })
+    .delete();
+
+  return workspace;
+}
