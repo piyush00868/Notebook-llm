@@ -1,5 +1,5 @@
 import { db } from "../prisma/db";
-
+import { normalizeText } from "./ingestion/text.service";
 type CreateDocumentInput = {
   title: string;
   sourceType: string;
@@ -9,14 +9,6 @@ type CreateDocumentInput = {
   status: string;
   notebookId: number;
 };
-
-function normalizeText(content: string) {
-  return content
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
 
 export async function createDocument(input: CreateDocumentInput) {
   const content = input.content
