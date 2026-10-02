@@ -595,6 +595,7 @@
               },
               "foreignKeys": [
                 {
+                  "onDelete": "cascade",
                   "source": {
                     "columns": [
                       "documentId"
@@ -691,6 +692,7 @@
               },
               "foreignKeys": [
                 {
+                  "onDelete": "cascade",
                   "source": {
                     "columns": [
                       "notebookId"
@@ -762,6 +764,7 @@
               },
               "foreignKeys": [
                 {
+                  "onDelete": "cascade",
                   "source": {
                     "columns": [
                       "workspaceId"
@@ -938,7 +941,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "13891df9e5b24d3817f808a9e69a8ee2880d2dc88811e77a3ef264af490fba67"
+    "storageHash": "a7d05e7422a48e34c187d507859231aad724083160fae80955629abaf18f74fa"
   },
   "execution": {
     "executionHash": "c9df51ffd67efc2e542645c196ea30acf88bf18d0200998dc217f9bd4db12bfb",
