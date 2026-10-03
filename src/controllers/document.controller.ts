@@ -6,6 +6,7 @@ import { getNotebookById } from "../services/notebook.service";
 import { extractPdfText } from "../services/ingestion/pdf.service";
 import { normalizeText } from "../services/ingestion/text.service";
 import { createDocumentChunks } from "../services/ingestion/chunk.service";
+import { indexDocumentChunks } from "../services/vector/vector.service";
 import { assertOwner } from "../services/authorization.service";
 import {
   createDocument,
@@ -281,6 +282,7 @@ export async function uploadPdfController(
       notebookId,
     });
     await createDocumentChunks(document.id);
+    await indexDocumentChunks(document.id);
     return res.status(201).json(document);
   } catch (error) {
     console.error("PDF INGESTION ERROR:", error);
