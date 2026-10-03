@@ -280,7 +280,7 @@ export async function uploadPdfController(
       status: "COMPLETED",
       notebookId,
     });
-
+    await createDocumentChunks(document.id);
     return res.status(201).json(document);
   } catch (error) {
     console.error("PDF INGESTION ERROR:", error);

@@ -6,5 +6,6 @@ export function normalizeText(content: string): string {
     .replace(/[ \t]+/g, " ")
     .replace(/ *\n */g, "\n")
     .replace(/\n{3,}/g, "\n\n")
+    .replace(/--\s*\d+\s+of\s+\d+\s*/gi, "")
     .trim();
 }

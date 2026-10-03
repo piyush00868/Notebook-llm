@@ -16,6 +16,8 @@
   "type": "module",
   "dependencies": {
     "@clerk/express": "^2.1.72",
+    "@mistralai/mistralai": "^2.7.0",
+    "@pinecone-database/pinecone": "^9.0.0",
     "@prisma/orm-postgres": "^8.0.0-rc.12",
     "cors": "^2.8.6",
     "dotenv": "^18.0.4",
