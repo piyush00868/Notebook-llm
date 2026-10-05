@@ -15,6 +15,17 @@ export function getVectorIndex() {
 }
 
 export async function indexDocumentChunks(documentId: number) {
+  
+  const document = await db.orm.public.Document
+    .where({
+      id: documentId,
+    })
+    .first();
+
+  if (!document) {
+    throw new Error("Document not found");
+  }
+
   const chunks = await db.orm.public.Chunk
     .where({
       documentId,
@@ -37,6 +48,7 @@ export async function indexDocumentChunks(documentId: number) {
       values: embeddings[index]!,
       metadata: {
         documentId: chunk.documentId,
+        notebookId: document.notebookId,
         chunkId: chunk.id,
         chunkIndex: chunk.chunkIndex,
       },
@@ -48,7 +60,7 @@ export async function indexDocumentChunks(documentId: number) {
 
 export async function searchSimilarChunks(
   query: string,
-  documentId: number,
+  notebookId: number,
   topK = 3,
 ) {
   const queryEmbedding = await generateEmbeddings([query]);
@@ -60,35 +72,32 @@ export async function searchSimilarChunks(
     topK,
     includeMetadata: true,
     filter: {
-      documentId: {
-        $eq: documentId,
+      notebookId: {
+        $eq: notebookId,
       },
     },
   });
 
   return result.matches ?? [];
 }
-
 export async function retrieveChunks(
   query: string,
-  documentId: number,
+  notebookId: number,
   topK = 3,
 ) {
   const matches = await searchSimilarChunks(
     query,
-    documentId,
+    notebookId,
     topK,
   );
 
   if (matches.length === 0) {
     return [];
   }
-
   const chunkIds = matches
     .map((match) => match.metadata?.chunkId)
     .filter((id): id is number => typeof id === "number");
-
-  if (chunkIds.length === 0) {
+ if (chunkIds.length === 0) {
     return [];
   }
 
