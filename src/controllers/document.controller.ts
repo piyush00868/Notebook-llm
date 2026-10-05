@@ -6,12 +6,14 @@ import { getNotebookById } from "../services/notebook.service";
 import { extractPdfText } from "../services/ingestion/pdf.service";
 import { normalizeText } from "../services/ingestion/text.service";
 import { createDocumentChunks } from "../services/ingestion/chunk.service";
+import { answerQuestion } from "../services/RAG/rag.service";
 import { indexDocumentChunks } from "../services/vector/vector.service";
 import { assertOwner } from "../services/authorization.service";
 import {
   createDocument,
   getDocumentById,
   deleteDocument,
+  updateDocumentStatus,
 } from "../services/document.service";
 const createDocumentSchema = z.object({
   title: z.string().min(1),
@@ -278,12 +280,21 @@ export async function uploadPdfController(
       title,
       sourceType: "PDF",
       content,
-      status: "COMPLETED",
+      status: "PENDING",
       notebookId,
     });
-    await createDocumentChunks(document.id);
-    await indexDocumentChunks(document.id);
-    return res.status(201).json(document);
+await updateDocumentStatus(document.id, "PROCESSING");
+
+try {
+  await createDocumentChunks(document.id);
+  await indexDocumentChunks(23);
+
+  await updateDocumentStatus(document.id, "COMPLETED");
+} catch (error) {
+  await updateDocumentStatus(document.id, "FAILED");
+
+  throw error;
+}
   } catch (error) {
     console.error("PDF INGESTION ERROR:", error);
 
@@ -327,6 +338,76 @@ export async function chunkDocumentController(
 
     return res.status(500).json({
       error: "Failed to chunk document",
+    });
+  }
+}
+
+export async function askDocumentController(
+  req: Request,
+  res: Response,
+) {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
+  try {
+    const documentId = Number(req.params.id);
+
+    if (!Number.isInteger(documentId) || documentId <= 0) {
+      return res.status(400).json({
+        error: "Invalid document id",
+      });
+    }
+
+    const question = String(req.body.question ?? "").trim();
+
+    if (!question) {
+      return res.status(400).json({
+        error: "Question is required",
+      });
+    }
+
+    const document = await getDocumentById(documentId);
+
+    if (!document) {
+      return res.status(404).json({
+        error: "Document not found",
+      });
+    }
+
+    if (!document.notebook?.workspace) {
+      return res.status(500).json({
+        error: "Document workspace not found",
+      });
+    }
+
+    try {
+      assertOwner(
+        document.notebook.workspace.owner.clerkUserId,
+        userId,
+      );
+    } catch {
+      return res.status(403).json({
+        error: "Forbidden",
+      });
+    }
+
+    const result = await answerQuestion(
+      question,
+      documentId,
+      3,
+    );
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("DOCUMENT RAG ERROR:", error);
+
+    return res.status(500).json({
+      error: "Failed to answer question",
     });
   }
 }
