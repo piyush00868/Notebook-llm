@@ -1,3 +1,6 @@
+import { Readability } from "@mozilla/readability";
+import { JSDOM } from "jsdom";
+
 export async function extractUrlText(url: string) {
   const response = await fetch(url);
 
@@ -9,7 +12,19 @@ export async function extractUrlText(url: string) {
 
   const html = await response.text();
 
-  // Temporary: we'll replace this with proper
-  // readable-content extraction next.
-  return html;
+  const dom = new JSDOM(html, {
+    url,
+  });
+
+  const reader = new Readability(dom.window.document);
+  const article = reader.parse();
+
+  if (!article?.textContent) {
+    throw new Error("Could not extract readable content");
+  }
+
+  return {
+    title: article.title ?? null,
+    content: article.textContent,
+  };
 }
