@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createNotebook, getNotebookById } from "../services/notebook.service";
 import { getAuth } from "@clerk/express";
 import { getWorkspaceById } from "../services/workspace.service";
+import { answerQuestion } from "../services/RAG/rag.service";
 import { assertOwner } from "../services/authorization.service";
 const createNotebookSchema = z.object({
   name: z.string().min(1),
@@ -104,6 +105,76 @@ try {
 
     return res.status(500).json({
       error: "Failed to get notebook",
+    });
+  }
+}
+
+export async function askNotebookController(
+  req: Request,
+  res: Response,
+) {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
+  try {
+    const notebookId = Number(req.params.id);
+
+    if (!Number.isInteger(notebookId) || notebookId <= 0) {
+      return res.status(400).json({
+        error: "Invalid notebook id",
+      });
+    }
+
+    const question = String(req.body.question ?? "").trim();
+
+    if (!question) {
+      return res.status(400).json({
+        error: "Question is required",
+      });
+    }
+
+    const notebook = await getNotebookById(notebookId);
+
+    if (!notebook) {
+      return res.status(404).json({
+        error: "Notebook not found",
+      });
+    }
+
+    if (!notebook.workspace) {
+      return res.status(500).json({
+        error: "Notebook workspace not found",
+      });
+    }
+
+    try {
+      assertOwner(
+        notebook.workspace.owner.clerkUserId,
+        userId,
+      );
+    } catch {
+      return res.status(403).json({
+        error: "Forbidden",
+      });
+    }
+
+    const result = await answerQuestion(
+      question,
+      notebookId,
+      5,
+    );
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("NOTEBOOK RAG ERROR:", error);
+
+    return res.status(500).json({
+      error: "Failed to answer question",
     });
   }
 }
