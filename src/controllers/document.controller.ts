@@ -5,7 +5,9 @@ import { getAuth } from "@clerk/express";
 import { getNotebookById } from "../services/notebook.service";
 import { extractPdfText } from "../services/ingestion/pdf.service";
 import { normalizeText } from "../services/ingestion/text.service";
+import { extractUrlText } from "../services/ingestion/url.service";
 import { createDocumentChunks } from "../services/ingestion/chunk.service";
+import { extractYoutubeTranscript } from "../services/ingestion/youtube.service";
 import { answerQuestion } from "../services/RAG/rag.service";
 import { indexDocumentChunks } from "../services/vector/vector.service";
 import { assertOwner } from "../services/authorization.service";
@@ -408,6 +410,223 @@ export async function askDocumentController(
 
     return res.status(500).json({
       error: "Failed to answer question",
+    });
+  }
+}
+
+export async function uploadUrlController(
+  req: Request,
+  res: Response,
+) {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
+  try {
+    const notebookId = Number(req.body.notebookId);
+    const title = String(req.body.title ?? "").trim();
+    const url = String(req.body.url ?? "").trim();
+
+    if (!Number.isInteger(notebookId) || notebookId <= 0) {
+      return res.status(400).json({
+        error: "Invalid notebookId",
+      });
+    }
+
+    if (!title) {
+      return res.status(400).json({
+        error: "Title is required",
+      });
+    }
+
+    if (!url) {
+      return res.status(400).json({
+        error: "URL is required",
+      });
+    }
+
+    const notebook = await getNotebookById(notebookId);
+
+    if (!notebook) {
+      return res.status(404).json({
+        error: "Notebook not found",
+      });
+    }
+
+    if (!notebook.workspace) {
+      return res.status(500).json({
+        error: "Notebook workspace not found",
+      });
+    }
+
+    try {
+      assertOwner(
+        notebook.workspace.owner.clerkUserId,
+        userId,
+      );
+    } catch {
+      return res.status(403).json({
+        error: "Forbidden",
+      });
+    }
+
+    const extracted = await extractUrlText(url);
+    const content = normalizeText(extracted.content);
+
+    if (!content) {
+      return res.status(400).json({
+        error: "Could not extract text from URL",
+      });
+    }
+
+    const document = await createDocument({
+      title,
+      sourceType: "URL",
+      sourceUrl: url,
+      content,
+      status: "PROCESSING",
+      notebookId,
+    });
+
+    try {
+      await createDocumentChunks(document.id);
+      await indexDocumentChunks(document.id);
+
+      await updateDocumentStatus(
+        document.id,
+        "COMPLETED",
+      );
+    } catch (error) {
+      await updateDocumentStatus(
+        document.id,
+        "FAILED",
+      );
+
+      throw error;
+    }
+
+    return res.status(201).json({
+      ...document,
+      status: "COMPLETED",
+    });
+  } catch (error) {
+    console.error("URL INGESTION ERROR:", error);
+
+    return res.status(500).json({
+      error: "Failed to ingest URL",
+    });
+  }
+}
+
+export async function uploadYoutubeController(
+  req: Request,
+  res: Response,
+) {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
+  try {
+    const notebookId = Number(req.body.notebookId);
+    const title = String(req.body.title ?? "").trim();
+    const url = String(req.body.url ?? "").trim();
+
+    if (!Number.isInteger(notebookId) || notebookId <= 0) {
+      return res.status(400).json({
+        error: "Invalid notebookId",
+      });
+    }
+
+    if (!title) {
+      return res.status(400).json({
+        error: "Title is required",
+      });
+    }
+
+    if (!url) {
+      return res.status(400).json({
+        error: "YouTube URL is required",
+      });
+    }
+
+    const notebook = await getNotebookById(notebookId);
+
+    if (!notebook) {
+      return res.status(404).json({
+        error: "Notebook not found",
+      });
+    }
+
+    if (!notebook.workspace) {
+      return res.status(500).json({
+        error: "Notebook workspace not found",
+      });
+    }
+
+    try {
+      assertOwner(
+        notebook.workspace.owner.clerkUserId,
+        userId,
+      );
+    } catch {
+      return res.status(403).json({
+        error: "Forbidden",
+      });
+    }
+
+    const transcript = await extractYoutubeTranscript(url);
+
+    const content = normalizeText(transcript.content);
+
+    if (!content) {
+      return res.status(400).json({
+        error: "Could not extract YouTube transcript",
+      });
+    }
+
+    const document = await createDocument({
+      title,
+      sourceType: "YOUTUBE",
+      sourceUrl: url,
+      content,
+      status: "PROCESSING",
+      notebookId,
+    });
+
+    try {
+      await createDocumentChunks(document.id);
+      await indexDocumentChunks(document.id);
+
+      await updateDocumentStatus(
+        document.id,
+        "COMPLETED",
+      );
+    } catch (error) {
+      await updateDocumentStatus(
+        document.id,
+        "FAILED",
+      );
+
+      throw error;
+    }
+
+    return res.status(201).json({
+      ...document,
+      status: "COMPLETED",
+    });
+  } catch (error) {
+    console.error("YOUTUBE INGESTION ERROR:", error);
+
+    return res.status(500).json({
+      error: "Failed to ingest YouTube video",
     });
   }
 }
