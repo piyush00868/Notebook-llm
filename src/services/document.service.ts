@@ -68,3 +68,14 @@ export async function deleteDocument(id: number) {
 
   return document;
 }
+
+export async function updateDocumentStatus(
+  id: number,
+  status: string,
+) {
+  return db.orm.public.Document
+    .where({ id })
+    .update({
+      status,
+    });
+}
