@@ -3,12 +3,12 @@ import { generateAnswer } from "../LLM/llm.service";
 
 export async function answerQuestion(
   question: string,
-  documentId: number,
-  topK = 4,
+  notebookId: number,
+  topK = 3,
 ) {
   const chunks = await retrieveChunks(
     question,
-    documentId,
+    notebookId,
     topK,
   );
 
