@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createDocumentController, getDocumentController,deleteDocumentController,uploadPdfController, chunkDocumentController } from "../controllers/document.controller";
+import { createDocumentController, getDocumentController,deleteDocumentController,uploadPdfController, chunkDocumentController, askDocumentController } from "../controllers/document.controller";
 import { requireAuth } from "../middleware/auth.middleware";
 import { uploadPdf } from "../middleware/upload.middleware";
 const router = Router();
