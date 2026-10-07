@@ -139,11 +139,18 @@ export async function deleteWorkspaceController(
       });
     }
 
-    await deleteWorkspace(id);
-
-    return res.status(204).send();
+    const deletedWorkspace = await deleteWorkspace(id);
+    if (!deletedWorkspace) {
+      return res.status(404).json({
+        error: "Workspace not found",
+      });
+    }
+    return res.status(200).json({
+      message: "Workspace deleted successfully",
+      workspace: deletedWorkspace,
+    });
   } catch (error) {
-    console.error(error);
+    console.error("DELETE WORKSPACE ERROR:", error);
 
     return res.status(500).json({
       error: "Failed to delete workspace",
