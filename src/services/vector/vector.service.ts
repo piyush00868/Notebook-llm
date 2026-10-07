@@ -104,11 +104,12 @@ export async function retrieveChunks(
  const chunks = [];
 
 for (const chunkId of chunkIds) {
-  const chunk = await db.orm.public.Chunk
-    .where({
-      id: chunkId,
-    })
-    .first();
+const chunk = await db.orm.public.Chunk
+  .where({
+    id: chunkId,
+  })
+  .include("document")
+  .first();
 
   if (chunk) {
     chunks.push(chunk);
@@ -138,6 +139,8 @@ for (const chunkId of chunkIds) {
         chunkIndex: chunk.chunkIndex,
         score: match.score,
         content: chunk.content,
+        documentId: chunk.documentId,
+        documentTitle: chunk.document.title,
       };
     })
     .filter(
@@ -148,6 +151,8 @@ for (const chunkId of chunkIds) {
         chunkIndex: number;
         score: number | undefined;
         content: string;
+        documentId: number;
+        documentTitle: string;
       } => chunk !== null,
     );
 }

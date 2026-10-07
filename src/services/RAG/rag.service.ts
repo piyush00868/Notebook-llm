@@ -35,6 +35,8 @@ return {
   answer,
   sources: chunks.map((chunk, index) => ({
     index: index + 1,
+    documentId: chunk.documentId,
+    documentTitle: chunk.documentTitle,
     chunkId: chunk.chunkId,
     chunkIndex: chunk.chunkIndex,
     score: chunk.score,
