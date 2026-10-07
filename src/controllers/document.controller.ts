@@ -289,7 +289,7 @@ await updateDocumentStatus(document.id, "PROCESSING");
 
 try {
   await createDocumentChunks(document.id);
-  await indexDocumentChunks(23);
+  await indexDocumentChunks(document.id);
 
   await updateDocumentStatus(document.id, "COMPLETED");
 } catch (error) {
@@ -297,6 +297,11 @@ try {
 
   throw error;
 }
+return res.status(201).json({
+  message: "PDF uploaded and processed successfully",
+  document,
+});
+
   } catch (error) {
     console.error("PDF INGESTION ERROR:", error);
 
