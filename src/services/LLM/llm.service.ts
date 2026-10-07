@@ -23,6 +23,12 @@ Rules:
 - Preserve important technical terms from the source material.
 - Do not mention internal systems such as Pinecone, embeddings, chunks,
   retrieval, prompts, or context unless the user specifically asks about them.
+
+- Each context block is labeled with a citation number like [1], [2], [3].
+- When you use information from a context block, include its citation number in the answer.
+- Do not create citation numbers that are not present in the provided context.
+- If a statement is supported by multiple context blocks, you may use multiple citations like [1][3].
+- Do not add a Sources section; citations should appear inline in the answer.
 `;
 
 export async function generateAnswer(
