@@ -27,3 +27,23 @@ export async function getNotebookById(id: number) {
 
   return notebook;
 }
+
+export async function deleteNotebook(id: number) {
+  const notebook = await db.orm.public.Notebook
+    .where({
+      id,
+    })
+    .first();
+
+  if (!notebook) {
+    return null;
+  }
+
+  await db.orm.public.Notebook
+    .where({
+      id,
+    })
+    .delete();
+
+  return notebook;
+}
