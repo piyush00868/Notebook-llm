@@ -1,68 +1,109 @@
 // use prisma-8
 
 model User {
-  id          Int         @id @default(autoincrement())
-  clerkUserId String?      @unique
-  email       String      @unique
+  id          Int                @id @default(autoincrement())
+  clerkUserId String?            @unique
+  email       String             @unique
   username    String?
   name        String?
   workspaces  Workspace[]
-  createdAt   TimestamptzString @default(now())
+  createdAt   TimestamptzString  @default(now())
   updatedAt   temporal.updatedAtString()
 }
+
 model Workspace {
-  id        Int       @id @default(autoincrement())
+  id        Int                @id @default(autoincrement())
   name      String
-  owner     User      @relation(fields: [ownerId], references: [id])
+  owner     User               @relation(fields: [ownerId], references: [id])
   ownerId   Int
   notebooks Notebook[]
-  createdAt TimestamptzString @default(now())
+  createdAt TimestamptzString  @default(now())
   updatedAt temporal.updatedAtString()
 }
 
 model Notebook {
-  id          Int       @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   name        String
-  workspace   Workspace @relation(
+
+  workspace   Workspace          @relation(
     fields: [workspaceId],
     references: [id],
     onDelete: Cascade
   )
+
   workspaceId Int
   documents   Document[]
-  createdAt   TimestamptzString @default(now())
+  chats       Chat[]
+
+  createdAt   TimestamptzString  @default(now())
   updatedAt   temporal.updatedAtString()
 }
 
 model Document {
-  id          Int        @id @default(autoincrement())
+  id          Int                @id @default(autoincrement())
   title       String
   content     String?
   sourceType  String
   sourceUrl   String?
   storageKey  String?
   status      String
-  notebook    Notebook   @relation(
+
+  notebook    Notebook           @relation(
     fields: [notebookId],
     references: [id],
     onDelete: Cascade
   )
+
   notebookId  Int
   chunks      Chunk[]
-  createdAt   TimestamptzString @default(now())
+
+  createdAt   TimestamptzString  @default(now())
   updatedAt   temporal.updatedAtString()
 }
 
 model Chunk {
-  id         Int      @id @default(autoincrement())
+  id         Int                @id @default(autoincrement())
   content    String
   chunkIndex Int
   pineconeId String?
-  document   Document @relation(
+
+  document   Document           @relation(
     fields: [documentId],
     references: [id],
     onDelete: Cascade
   )
+
   documentId Int
-  createdAt  TimestamptzString @default(now())
+  createdAt  TimestamptzString  @default(now())
+}
+
+model Chat {
+  id         Int                @id @default(autoincrement())
+
+  notebook   Notebook           @relation(
+    fields: [notebookId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  notebookId Int
+  messages   ChatMessage[]
+
+  createdAt  TimestamptzString  @default(now())
+  updatedAt  temporal.updatedAtString()
+}
+
+model ChatMessage {
+  id        Int                @id @default(autoincrement())
+
+  chat      Chat               @relation(
+    fields: [chatId],
+    references: [id],
+    onDelete: Cascade
+  )
+
+  chatId    Int
+  role      String
+  content   String
+  createdAt TimestamptzString  @default(now())
 }
