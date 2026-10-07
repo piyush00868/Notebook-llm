@@ -1,11 +1,12 @@
 import type { Request } from "express";
 import type { Response } from "express";
 import { z } from "zod";
-import { createNotebook, getNotebookById } from "../services/notebook.service";
+import { createNotebook, getNotebookById,deleteNotebook } from "../services/notebook.service";
 import { getAuth } from "@clerk/express";
 import { getWorkspaceById } from "../services/workspace.service";
 import { answerQuestion } from "../services/RAG/rag.service";
 import { assertOwner } from "../services/authorization.service";
+
 const createNotebookSchema = z.object({
   name: z.string().min(1),
   workspaceId: z.number().int().positive(),
@@ -175,6 +176,73 @@ export async function askNotebookController(
 
     return res.status(500).json({
       error: "Failed to answer question",
+    });
+  }
+}
+
+export async function deleteNotebookController(
+  req: Request,
+  res: Response,
+) {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Invalid notebook id",
+      });
+    }
+
+    const notebook = await getNotebookById(id);
+
+    if (!notebook) {
+      return res.status(404).json({
+        error: "Notebook not found",
+      });
+    }
+
+    if (!notebook.workspace) {
+      return res.status(500).json({
+        error: "Notebook workspace not found",
+      });
+    }
+
+    try {
+      assertOwner(
+        notebook.workspace.owner.clerkUserId,
+        userId,
+      );
+    } catch {
+      return res.status(403).json({
+        error: "Forbidden",
+      });
+    }
+
+    const deletedNotebook = await deleteNotebook(id);
+
+    if (!deletedNotebook) {
+      return res.status(404).json({
+        error: "Notebook not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Notebook deleted successfully",
+      notebook: deletedNotebook,
+    });
+  } catch (error) {
+    console.error("DELETE NOTEBOOK ERROR:", error);
+
+    return res.status(500).json({
+      error: "Failed to delete notebook",
     });
   }
 }
