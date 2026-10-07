@@ -19,24 +19,25 @@ export async function answerQuestion(
     };
   }
 
-  const context = chunks
-    .map(
-      (chunk) =>
-        `[Chunk ${chunk.chunkIndex}]\n${chunk.content}`,
-    )
-    .join("\n\n");
+const context = chunks
+  .map(
+    (chunk, index) =>
+      `[${index + 1}]\n${chunk.content}`,
+  )
+  .join("\n\n");
 
   const answer = await generateAnswer(
     question,
     context,
   );
 
-  return {
-    answer,
-    sources: chunks.map((chunk) => ({
-      chunkId: chunk.chunkId,
-      chunkIndex: chunk.chunkIndex,
-      score: chunk.score,
-    })),
-  };
+return {
+  answer,
+  sources: chunks.map((chunk, index) => ({
+    index: index + 1,
+    chunkId: chunk.chunkId,
+    chunkIndex: chunk.chunkIndex,
+    score: chunk.score,
+  })),
 }
+};
