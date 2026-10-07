@@ -1,0 +1,332 @@
+[
+  {
+    "id": "index.Chat.Chat_notebookId_idx",
+    "label": "Create index \"Chat_notebookId_idx\" on \"Chat\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "Chat_notebookId_idx",
+        "table": "Chat"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"Chat_notebookId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Chat_notebookId_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"Chat_notebookId_idx\"",
+        "sql": "CREATE INDEX \"Chat_notebookId_idx\" ON \"public\".\"Chat\" (\"notebookId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"Chat_notebookId_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"Chat_notebookId_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.ChatMessage.ChatMessage_chatId_idx",
+    "label": "Create index \"ChatMessage_chatId_idx\" on \"ChatMessage\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "ChatMessage_chatId_idx",
+        "table": "ChatMessage"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"ChatMessage_chatId_idx\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ChatMessage_chatId_idx\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"ChatMessage_chatId_idx\"",
+        "sql": "CREATE INDEX \"ChatMessage_chatId_idx\" ON \"public\".\"ChatMessage\" (\"chatId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"ChatMessage_chatId_idx\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"ChatMessage_chatId_idx\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.Chunk.Chunk_documentId_fkey",
+    "label": "Drop constraint \"Chunk_documentId_fkey\" on \"Chunk\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Chunk_documentId_fkey",
+        "table": "Chunk"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Chunk_documentId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Chunk_documentId_fkey",
+          "public",
+          "\"public\".\"Chunk\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"Chunk_documentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Chunk\" DROP CONSTRAINT \"Chunk_documentId_fkey\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Chunk_documentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Chunk_documentId_fkey",
+          "public",
+          "\"public\".\"Chunk\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Chunk.Chunk_documentId_fkey",
+    "label": "Add foreign key \"Chunk_documentId_fkey\" on \"Chunk\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Chunk_documentId_fkey",
+        "table": "Chunk"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Chunk_documentId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Chunk_documentId_fkey",
+          "public",
+          "\"public\".\"Chunk\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Chunk_documentId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Chunk\"\nADD CONSTRAINT \"Chunk_documentId_fkey\"\nFOREIGN KEY (\"documentId\")\nREFERENCES \"public\".\"Document\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Chunk_documentId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Chunk_documentId_fkey",
+          "public",
+          "\"public\".\"Chunk\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.Document.Document_notebookId_fkey",
+    "label": "Drop constraint \"Document_notebookId_fkey\" on \"Document\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Document_notebookId_fkey",
+        "table": "Document"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Document_notebookId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Document_notebookId_fkey",
+          "public",
+          "\"public\".\"Document\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"Document_notebookId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Document\" DROP CONSTRAINT \"Document_notebookId_fkey\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Document_notebookId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Document_notebookId_fkey",
+          "public",
+          "\"public\".\"Document\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Document.Document_notebookId_fkey",
+    "label": "Add foreign key \"Document_notebookId_fkey\" on \"Document\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Document_notebookId_fkey",
+        "table": "Document"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Document_notebookId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Document_notebookId_fkey",
+          "public",
+          "\"public\".\"Document\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Document_notebookId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Document\"\nADD CONSTRAINT \"Document_notebookId_fkey\"\nFOREIGN KEY (\"notebookId\")\nREFERENCES \"public\".\"Notebook\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Document_notebookId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Document_notebookId_fkey",
+          "public",
+          "\"public\".\"Document\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropConstraint.Notebook.Notebook_workspaceId_fkey",
+    "label": "Drop constraint \"Notebook_workspaceId_fkey\" on \"Notebook\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Notebook_workspaceId_fkey",
+        "table": "Notebook"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"Notebook_workspaceId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Notebook_workspaceId_fkey",
+          "public",
+          "\"public\".\"Notebook\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"Notebook_workspaceId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Notebook\" DROP CONSTRAINT \"Notebook_workspaceId_fkey\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"Notebook_workspaceId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Notebook_workspaceId_fkey",
+          "public",
+          "\"public\".\"Notebook\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.Notebook.Notebook_workspaceId_fkey",
+    "label": "Add foreign key \"Notebook_workspaceId_fkey\" on \"Notebook\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "Notebook_workspaceId_fkey",
+        "table": "Notebook"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"Notebook_workspaceId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Notebook_workspaceId_fkey",
+          "public",
+          "\"public\".\"Notebook\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"Notebook_workspaceId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"Notebook\"\nADD CONSTRAINT \"Notebook_workspaceId_fkey\"\nFOREIGN KEY (\"workspaceId\")\nREFERENCES \"public\".\"Workspace\" (\"id\")\nON DELETE CASCADE"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"Notebook_workspaceId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "Notebook_workspaceId_fkey",
+          "public",
+          "\"public\".\"Notebook\""
+        ]
+      }
+    ]
+  }
+]
