@@ -15,5 +15,5 @@ export async function getChatsByNotebookId(notebookId: number) {
     })
     .all();
 
-  return chats;
+  return chats; 
 }
