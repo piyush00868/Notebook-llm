@@ -45,7 +45,11 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
   },
+  "include": [
+    "src"
+  ],
    "exclude": [
-    "migrations"
+    "migrations",
+    "frontend"
   ]
 }
