@@ -17,3 +17,29 @@ export async function getChatsByNotebookId(notebookId: number) {
 
   return chats; 
 }
+
+
+export async function saveChatMessage(
+  chatId: number,
+  role: "user" | "assistant",
+  content: string,
+) {
+  const message = await db.orm.public.ChatMessage.create({
+    chatId,
+    role,
+    content,
+  });
+
+  return message;
+}
+
+
+export async function getChatMessages(chatId: number) {
+  const messages = await db.orm.public.ChatMessage
+    .where({
+      chatId,
+    })
+    .all();
+
+  return messages;
+}
