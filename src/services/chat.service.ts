@@ -18,20 +18,31 @@ export async function getChatsByNotebookId(notebookId: number) {
   return chats; 
 }
 
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
 
 export async function saveChatMessage(
   chatId: number,
   role: "user" | "assistant",
   content: string,
+  sources?: JsonValue,
 ) {
   const message = await db.orm.public.ChatMessage.create({
     chatId,
     role,
     content,
+    ...(sources !== undefined ? { sources } : {}),
   });
 
   return message;
 }
+
 
 
 export async function getChatMessages(chatId: number) {

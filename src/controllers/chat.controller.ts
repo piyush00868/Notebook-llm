@@ -208,8 +208,17 @@ export async function askChatController(
     const result = await answerQuestion(question, chat.notebookId, 5);
 
     // Save the assistant's answer in the same chat.
-    await saveChatMessage(chatId, "assistant", result.answer);
-
+await saveChatMessage(
+  chatId,
+  "assistant",
+  result.answer,
+  result.sources.map((source) => {
+  const { score, ...rest } = source;
+  return score === undefined
+    ? rest
+    : { ...rest, score };
+})
+)
     return res.status(200).json(result);
   } catch (error) {
     console.error("CHAT ASK ERROR:", error);
