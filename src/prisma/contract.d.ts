@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'61a955d6f37b736b5d53c9c65d19e46cdeaaf2dc80eb945005ddf94bfe4c7a67'>;
+  StorageHashBase<'6c99295ac6ea9a961f1b50a4bac5fb8168a1e4441fbbf77f0f2e35d372526db3'>;
 export type ExecutionHash =
   ExecutionHashBase<'9d64c7fa0f239511c9064c8a1a8435c38219d1bf556cc59db0afa0cf55c22c92'>;
 export type ProfileHash =
@@ -262,6 +262,7 @@ export type FieldOutputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly role: CodecTypes['pg/text@1']['output'];
+      readonly sources: CodecTypes['pg/json@1']['output'] | null;
     };
     readonly Chunk: {
       readonly chunkIndex: CodecTypes['pg/int4@1']['output'];
@@ -322,6 +323,7 @@ export type FieldInputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly role: CodecTypes['pg/text@1']['input'];
+      readonly sources: CodecTypes['pg/json@1']['input'] | null;
     };
     readonly Chunk: {
       readonly chunkIndex: CodecTypes['pg/int4@1']['input'];
@@ -382,6 +384,7 @@ export type StorageColumnTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
       readonly id: CodecTypes['pg/int4@1']['output'];
       readonly role: CodecTypes['pg/text@1']['output'];
+      readonly sources: CodecTypes['pg/json@1']['output'] | null;
     };
     readonly Chunk: {
       readonly chunkIndex: CodecTypes['pg/int4@1']['output'];
@@ -442,6 +445,7 @@ export type StorageColumnInputTypes = {
       readonly createdAt: CodecTypes['pg/timestamptz-string@1']['input'];
       readonly id: CodecTypes['pg/int4@1']['input'];
       readonly role: CodecTypes['pg/text@1']['input'];
+      readonly sources: CodecTypes['pg/json@1']['input'] | null;
     };
     readonly Chunk: {
       readonly chunkIndex: CodecTypes['pg/int4@1']['input'];
@@ -505,6 +509,7 @@ export namespace Models {
     createdAt: CodecTypes['pg/timestamptz-string@1']['output'];
     id: CodecTypes['pg/int4@1']['output'];
     role: CodecTypes['pg/text@1']['output'];
+    sources: CodecTypes['pg/json@1']['output'] | null;
     chat: public_Chat;
     readonly [RelationKeys]?: 'chat';
   };
@@ -681,6 +686,11 @@ type ContractBase = Omit<
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
+                };
+                readonly sources: {
+                  readonly nativeType: 'json';
+                  readonly codecId: 'pg/json@1';
+                  readonly nullable: true;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
@@ -1133,6 +1143,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly sources: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/json@1' };
+              };
             };
             readonly relations: {
               readonly chat: {
@@ -1154,6 +1168,7 @@ type ContractBase = Omit<
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
                 readonly role: { readonly column: 'role' };
+                readonly sources: { readonly column: 'sources' };
               };
             };
           };

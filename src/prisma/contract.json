@@ -156,6 +156,13 @@
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
+              },
+              "sources": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/json@1",
+                  "kind": "scalar"
+                }
               }
             },
             "relations": {
@@ -192,6 +199,9 @@
                 },
                 "role": {
                   "column": "role"
+                },
+                "sources": {
+                  "column": "sources"
                 }
               },
               "namespaceId": "public",
@@ -837,6 +847,11 @@
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "sources": {
+                  "codecId": "pg/json@1",
+                  "nativeType": "json",
+                  "nullable": true
                 }
               },
               "foreignKeys": [
@@ -1264,7 +1279,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "61a955d6f37b736b5d53c9c65d19e46cdeaaf2dc80eb945005ddf94bfe4c7a67"
+    "storageHash": "6c99295ac6ea9a961f1b50a4bac5fb8168a1e4441fbbf77f0f2e35d372526db3"
   },
   "execution": {
     "executionHash": "9d64c7fa0f239511c9064c8a1a8435c38219d1bf556cc59db0afa0cf55c22c92",

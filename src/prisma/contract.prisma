@@ -103,6 +103,7 @@ model ChatMessage {
   )
 
   chatId    Int
+  sources   Json?
   role      String
   content   String
   createdAt TimestamptzString  @default(now())

@@ -1,0 +1,44 @@
+[
+  {
+    "id": "column.public.ChatMessage.sources",
+    "label": "Add column \"sources\" to \"ChatMessage\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "sources",
+        "table": "ChatMessage"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"sources\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "ChatMessage",
+          "sources"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"sources\"",
+        "sql": "ALTER TABLE \"public\".\"ChatMessage\" ADD COLUMN \"sources\" jsonb"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"sources\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "ChatMessage",
+          "sources"
+        ]
+      }
+    ]
+  }
+]
