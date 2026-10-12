@@ -1,5 +1,7 @@
 import type { Request, Response } from "express";
 import { getAuth } from "@clerk/express";
+import { answerQuestion } from "../services/RAG/rag.service";
+import { saveChatMessage } from "../services/chat.service";
 import {
   createChat,
   getChatsByNotebookId,
@@ -145,6 +147,75 @@ export async function getChatMessagesController(
 
     return res.status(500).json({
       error: "Failed to get chat messages",
+    });
+  }
+}
+
+
+export async function askChatController(
+  req: Request,
+  res: Response,
+) {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  try {
+    const chatId = Number(req.params.chatId);
+
+    if (!Number.isInteger(chatId) || chatId <= 0) {
+      return res.status(400).json({ error: "Invalid chat id" });
+    }
+
+    const question = String(req.body.question ?? "").trim();
+
+    if (!question) {
+      return res.status(400).json({ error: "Question is required" });
+    }
+
+    const chat = await db.orm.public.Chat
+      .where({ id: chatId })
+      .first();
+
+    if (!chat) {
+      return res.status(404).json({ error: "Chat not found" });
+    }
+
+    const notebook = await getNotebookById(chat.notebookId);
+
+    if (!notebook) {
+      return res.status(404).json({ error: "Notebook not found" });
+    }
+
+    if (!notebook.workspace) {
+      return res.status(500).json({
+        error: "Notebook workspace not found",
+      });
+    }
+
+    try {
+      assertOwner(notebook.workspace.owner.clerkUserId, userId);
+    } catch {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    // Save the user's question in this chat.
+    await saveChatMessage(chatId, "user", question);
+
+    // Use the notebook's sources to generate the answer.
+    const result = await answerQuestion(question, chat.notebookId, 5);
+
+    // Save the assistant's answer in the same chat.
+    await saveChatMessage(chatId, "assistant", result.answer);
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("CHAT ASK ERROR:", error);
+
+    return res.status(500).json({
+      error: "Failed to answer chat question",
     });
   }
 }
