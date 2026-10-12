@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { askNotebookController, createNotebookController, getNotebookController,deleteNotebookController } from "../controllers/notebook.controller";
 import { requireAuth } from "../middleware/auth.middleware";
+import { getChatMessagesController } from "../controllers/chat.controller";
 import {
   createChatController,
   listChatsController,
@@ -15,4 +16,5 @@ router.post("/:id/ask", askNotebookController);
 router.delete("/:id", deleteNotebookController);
 router.post("/:id/chats", createChatController);
 router.get("/:id/chats", listChatsController);
+router.get("/chats/:chatId/messages", getChatMessagesController);
 export default router;
