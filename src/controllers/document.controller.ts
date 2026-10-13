@@ -635,3 +635,113 @@ export async function uploadYoutubeController(
     });
   }
 }
+
+/**
+ * Pasted text.
+ *
+ * Mirrors the URL and YouTube controllers: store the normalised text, chunk
+ * it, then index the chunks so retrieval can actually find them.
+ *
+ * Without `indexDocumentChunks` the document and its chunks exist but carry
+ * no vector in Pinecone, so a question can never surface it -- the source
+ * would sit in the notebook permanently unreachable.
+ */
+export async function uploadTextController(
+  req: Request,
+  res: Response,
+) {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
+  try {
+    const notebookId = Number(req.body.notebookId);
+    const title = String(req.body.title ?? "").trim();
+    const rawContent = String(req.body.content ?? "");
+
+    if (!Number.isInteger(notebookId) || notebookId <= 0) {
+      return res.status(400).json({
+        error: "Invalid notebookId",
+      });
+    }
+
+    if (!title) {
+      return res.status(400).json({
+        error: "Title is required",
+      });
+    }
+
+    const content = normalizeText(rawContent);
+
+    if (!content) {
+      return res.status(400).json({
+        error: "Text is required",
+      });
+    }
+
+    const notebook = await getNotebookById(notebookId);
+
+    if (!notebook) {
+      return res.status(404).json({
+        error: "Notebook not found",
+      });
+    }
+
+    if (!notebook.workspace) {
+      return res.status(500).json({
+        error: "Notebook workspace not found",
+      });
+    }
+
+    try {
+      assertOwner(
+        notebook.workspace.owner.clerkUserId,
+        userId,
+      );
+    } catch {
+      return res.status(403).json({
+        error: "Forbidden",
+      });
+    }
+
+    const document = await createDocument({
+      title,
+      sourceType: "TEXT",
+      content,
+      status: "PROCESSING",
+      notebookId,
+    });
+
+    try {
+      await createDocumentChunks(document.id);
+      await indexDocumentChunks(document.id);
+
+      await updateDocumentStatus(
+        document.id,
+        "COMPLETED",
+      );
+    } catch (error) {
+      await updateDocumentStatus(
+        document.id,
+        "FAILED",
+      );
+
+      throw error;
+    }
+
+    return res.status(201).json({
+      ...document,
+      status: "COMPLETED",
+    });
+  } catch (error) {
+    console.error("TEXT INGESTION ERROR:", error);
+
+    return res.status(500).json({
+      error: "Failed to ingest text",
+    });
+  }
+}
