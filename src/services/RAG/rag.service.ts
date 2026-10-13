@@ -19,27 +19,30 @@ export async function answerQuestion(
     };
   }
 
-const context = chunks
-  .map(
-    (chunk, index) =>
-      `[${index + 1}]\n${chunk.content}`,
-  )
-  .join("\n\n");
+  const context = chunks
+    .map(
+      (chunk, index) =>
+        `[${index + 1}]\n${chunk.content}`,
+    )
+    .join("\n\n");
 
-  const answer = await generateAnswer(
-    question,
-    context,
-  );
-
-return {
-  answer,
-  sources: chunks.map((chunk, index) => ({
+  const sources = chunks.map((chunk, index) => ({
     index: index + 1,
     documentId: chunk.documentId,
     documentTitle: chunk.documentTitle,
     chunkId: chunk.chunkId,
     chunkIndex: chunk.chunkIndex,
     score: chunk.score,
-  })),
+  }));
+
+  const answer = await generateAnswer(
+    question,
+    context,
+    sources.map((source) => source.index),
+  );
+
+  return {
+    answer,
+    sources,
+  };
 }
-};
