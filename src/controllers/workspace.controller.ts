@@ -5,6 +5,7 @@ import { assertOwner } from "../services/authorization.service";
 import {
   createWorkspace,
   getWorkspaceById,
+  getWorkspacesByOwnerId,
   deleteWorkspace
 } from "../services/workspace.service";
 import { syncCurrentUser } from "../services/auth.service";
@@ -51,6 +52,43 @@ const workspace = await createWorkspace({
 
     return res.status(500).json({
       error: "Failed to create workspace",
+    });
+  }
+}
+
+/**
+ * Lists every workspace the signed-in user owns.
+ *
+ * Without this, a client cannot discover the workspaces it already has: there
+ * is no other route that returns more than one, so a cached id is the only way
+ * back to existing data and an empty or stale cache looks like data loss.
+ */
+export async function listWorkspacesController(req: Request, res: Response) {
+  const { userId } = getAuth(req);
+
+  if (!userId) {
+    return res.status(401).json({
+      error: "Unauthorized",
+    });
+  }
+
+  try {
+    const user = await syncCurrentUser(userId);
+
+    if (!user) {
+      return res.status(500).json({
+        error: "Failed to synchronize user",
+      });
+    }
+
+    const workspaces = await getWorkspacesByOwnerId(user.id);
+
+    return res.status(200).json(workspaces);
+  } catch (error) {
+    console.error("LIST WORKSPACES ERROR:", error);
+
+    return res.status(500).json({
+      error: "Failed to list workspaces",
     });
   }
 }
