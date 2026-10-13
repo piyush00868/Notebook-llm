@@ -54,3 +54,31 @@ export async function getChatMessages(chatId: number) {
 
   return messages;
 }
+
+/**
+ * Deletes a conversation.
+ *
+ * `ChatMessage` rows go with it: the schema declares the relation with
+ * `onDelete: Cascade`, so the database removes them.
+ *
+ * Returns the deleted chat, or `null` when there was nothing to delete.
+ */
+export async function deleteChat(chatId: number) {
+  const chat = await db.orm.public.Chat
+    .where({
+      id: chatId,
+    })
+    .first();
+
+  if (!chat) {
+    return null;
+  }
+
+  await db.orm.public.Chat
+    .where({
+      id: chatId,
+    })
+    .delete();
+
+  return chat;
+}
