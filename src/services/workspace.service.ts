@@ -26,6 +26,27 @@ export async function getWorkspaceById(id: number) {
   return workspace;
 }
 
+/**
+ * Every workspace belonging to one owner.
+ *
+ * Newest first, so a client that needs to pick one on first run lands on the
+ * most recent. Notebooks are included so a list is directly renderable and the
+ * client does not have to fetch each workspace individually to find its data.
+ */
+export async function getWorkspacesByOwnerId(ownerId: number) {
+  const workspaces = await db.orm.public.Workspace
+    .where({
+      ownerId,
+    })
+    .include("notebooks")
+    .all();
+
+  return workspaces.sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
+}
+
 export async function deleteWorkspace(id: number) {
   const workspace = await db.orm.public.Workspace
     .where({
