@@ -45,7 +45,7 @@ npm install
 cp .env.example .env
 ```
 
-> **`.env.example` is incomplete.** It lists only 4 of the 10 variables the server actually reads. You must add the AI/vector keys yourself — see the full table below.
+Every variable the server reads is listed in `.env.example`. The two easiest to miss are `PINECONE_INDEX_NAME` — an empty value means there is no index to write to — and `GROQ_MODEL`, which is optional and falls back to a default.
 
 ### 3. Sync the database schema
 
