@@ -234,11 +234,7 @@ src/
 
 ## Gotchas
 
-Verified against the current source. Several are real bugs.
-
-**`POST /documents/:id/ask` is broken.** `askDocumentController` passes the **document** id into the **notebook** slot — `answerQuestion(question, documentId, 3)` — so Pinecone filters on `notebookId == documentId`. It will match nothing, or the wrong notebook, unless the ids coincide. Only the two `/notebooks/...` ask routes are correct.
-
-**`POST /documents/:id/chunks` has no ownership check.** It performs no `getAuth` and no `assertOwner`, unlike every sibling route. Any authenticated user who guesses a `documentId` can re-chunk someone else's document.
+Verified against the current source.
 
 **Deleting a document orphans its Pinecone vectors.** `deleteDocument` removes `Chunk` and `Document` rows but never calls a Pinecone `deleteMany`. Deleting a workspace or notebook cascades in Postgres and does nothing in Pinecone.
 
