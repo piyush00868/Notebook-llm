@@ -8,7 +8,6 @@ import { normalizeText } from "../services/ingestion/text.service";
 import { extractUrlText } from "../services/ingestion/url.service";
 import { createDocumentChunks } from "../services/ingestion/chunk.service";
 import { extractYoutubeTranscript } from "../services/ingestion/youtube.service";
-import { answerQuestion } from "../services/RAG/rag.service";
 import { indexDocumentChunks } from "../services/vector/vector.service";
 import { assertOwner } from "../services/authorization.service";
 import {
@@ -320,104 +319,6 @@ return res.status(201).json({
   }
 }
 
-export async function chunkDocumentController(
-  req: Request,
-  res: Response,
-) {
-  try {
-    const id = Number(req.params.id);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "Invalid document id",
-      });
-    }
-
-    const chunks = await createDocumentChunks(id);
-
-    return res.status(201).json({
-      documentId: id,
-      chunkCount: chunks.length,
-      chunks,
-    });
-  } catch (error) {
-    console.error("CHUNKING ERROR:", error);
-
-    return res.status(500).json({
-      error: "Failed to chunk document",
-    });
-  }
-}
-
-export async function askDocumentController(
-  req: Request,
-  res: Response,
-) {
-  const { userId } = getAuth(req);
-
-  if (!userId) {
-    return res.status(401).json({
-      error: "Unauthorized",
-    });
-  }
-
-  try {
-    const documentId = Number(req.params.id);
-
-    if (!Number.isInteger(documentId) || documentId <= 0) {
-      return res.status(400).json({
-        error: "Invalid document id",
-      });
-    }
-
-    const question = String(req.body.question ?? "").trim();
-
-    if (!question) {
-      return res.status(400).json({
-        error: "Question is required",
-      });
-    }
-
-    const document = await getDocumentById(documentId);
-
-    if (!document) {
-      return res.status(404).json({
-        error: "Document not found",
-      });
-    }
-
-    if (!document.notebook?.workspace) {
-      return res.status(500).json({
-        error: "Document workspace not found",
-      });
-    }
-
-    try {
-      assertOwner(
-        document.notebook.workspace.owner.clerkUserId,
-        userId,
-      );
-    } catch {
-      return res.status(403).json({
-        error: "Forbidden",
-      });
-    }
-
-    const result = await answerQuestion(
-      question,
-      documentId,
-      3,
-    );
-
-    return res.status(200).json(result);
-  } catch (error) {
-    console.error("DOCUMENT RAG ERROR:", error);
-
-    return res.status(500).json({
-      error: "Failed to answer question",
-    });
-  }
-}
 
 export async function uploadUrlController(
   req: Request,
