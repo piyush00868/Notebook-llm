@@ -8,8 +8,8 @@ router.post("/", createDocumentController);
 router.get("/:id", getDocumentController);
 router.post("/upload", uploadPdf.single("file"), uploadPdfController);
 router.delete("/:id", deleteDocumentController);
-router.post("/:id/chunks", chunkDocumentController);
-router.post("/:id/ask", askDocumentController);
+// router.post("/:id/chunks", chunkDocumentController);
+// router.post("/:id/ask", askDocumentController);
 router.post("/youtube", uploadYoutubeController);
 router.post("/url", uploadUrlController);
 // Registered before "/:id" style routes for readability; single-segment path,
