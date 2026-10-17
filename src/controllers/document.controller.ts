@@ -4,7 +4,6 @@ import { z } from "zod";
 import { getAuth } from "@clerk/express";
 import { getNotebookById } from "../services/notebook.service";
 import { extractPdfText } from "../services/ingestion/pdf.service";
-import { normalizeText } from "../services/ingestion/text.service";
 import { extractUrlText } from "../services/ingestion/url.service";
 import { createDocumentChunks } from "../services/ingestion/chunk.service";
 import { extractYoutubeTranscript } from "../services/ingestion/youtube.service";
@@ -268,19 +267,33 @@ export async function uploadPdfController(
       });
     }
 
-    const extractedText = await extractPdfText(req.file.buffer);
-    const content = normalizeText(extractedText);
+    const extracted = await extractPdfText(req.file.buffer);
 
-    if (!content) {
+    /*
+     * Release the uploaded PDF as soon as text extraction finishes.
+     *
+     * `multer.memoryStorage` keeps the whole upload referenced by `req.file`
+     * for the lifetime of the request, so it would otherwise sit alongside the
+     * extracted text, the chunk array and the embedding batches all at once.
+     * Nothing downstream reads it.
+     */
+    req.file.buffer = Buffer.alloc(0);
+
+    if (!extracted.trim()) {
       return res.status(400).json({
         error: "Could not extract text from PDF",
       });
     }
 
+    /*
+     * Normalisation happens once, inside `createDocument`. Doing it here as
+     * well meant every ingestion path ran the full replace chain twice over
+     * the whole document, doubling peak allocation for no behavioural gain.
+     */
     const document = await createDocument({
       title,
       sourceType: "PDF",
-      content,
+      content: extracted,
       status: "PENDING",
       notebookId,
     });
@@ -381,9 +394,8 @@ export async function uploadUrlController(
     }
 
     const extracted = await extractUrlText(url);
-    const content = normalizeText(extracted.content);
 
-    if (!content) {
+    if (!extracted.content.trim()) {
       return res.status(400).json({
         error: "Could not extract text from URL",
       });
@@ -393,7 +405,7 @@ export async function uploadUrlController(
       title,
       sourceType: "URL",
       sourceUrl: url,
-      content,
+      content: extracted.content,
       status: "PROCESSING",
       notebookId,
     });
@@ -490,9 +502,7 @@ export async function uploadYoutubeController(
 
     const transcript = await extractYoutubeTranscript(url);
 
-    const content = normalizeText(transcript.content);
-
-    if (!content) {
+    if (!transcript.content.trim()) {
       return res.status(400).json({
         error: "Could not extract YouTube transcript",
       });
@@ -502,7 +512,7 @@ export async function uploadYoutubeController(
       title,
       sourceType: "YOUTUBE",
       sourceUrl: url,
-      content,
+      content: transcript.content,
       status: "PROCESSING",
       notebookId,
     });
@@ -576,9 +586,7 @@ export async function uploadTextController(
       });
     }
 
-    const content = normalizeText(rawContent);
-
-    if (!content) {
+    if (!rawContent.trim()) {
       return res.status(400).json({
         error: "Text is required",
       });
@@ -612,7 +620,7 @@ export async function uploadTextController(
     const document = await createDocument({
       title,
       sourceType: "TEXT",
-      content,
+      content: rawContent,
       status: "PROCESSING",
       notebookId,
     });
