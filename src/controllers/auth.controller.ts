@@ -43,7 +43,15 @@ export async function startYouTubeAuth(req: Request, res: Response) {
     });
   }
 
-  return res.redirect(buildConsentUrl(createState(userId)));
+  /*
+   * The URL is returned rather than redirected to.
+   *
+   * The API authenticates from an `Authorization` header, and Clerk's session
+   * cookie is scoped to the frontend domain, so a browser navigating here
+   * directly arrives with neither and is rejected. The client fetches this
+   * first and then navigates to the returned URL.
+   */
+  return res.status(200).json({ url: buildConsentUrl(createState(userId)) });
 }
 
 /**
