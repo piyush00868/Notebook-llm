@@ -73,9 +73,11 @@ export async function youTubeAuthCallback(req: Request, res: Response) {
   const verified = verifyState(state);
 
   if (!verified.ok) {
+  if (!verified.ok) {
     return res.redirect(
-      `/workspace?youtube=error&reason=${encodeURIComponent(verified.reason)}`,
+      frontendUrl(`/workspace?youtube=error&reason=${encodeURIComponent(verified.reason)}`),
     );
+  }
   }
 
   try {
@@ -86,15 +88,11 @@ export async function youTubeAuthCallback(req: Request, res: Response) {
 
     await saveRefreshToken(verified.clerkUserId, refreshToken);
 
-    return res.redirect("/workspace?youtube=connected");
+    return res.redirect(frontendUrl("/workspace?youtube=connected"));
   } catch (error) {
     console.error("YOUTUBE OAUTH ERROR:", error);
 
-    return res.redirect(
-      `/workspace?youtube=error&reason=${encodeURIComponent(
-        "Could not complete the Google authorisation.",
-      )}`,
-    );
+    return res.redirect(frontendUrl(`/workspace?youtube=error&reason=${encodeURIComponent("Could not complete the Google authorisation.")}`));
   }
 }
 
