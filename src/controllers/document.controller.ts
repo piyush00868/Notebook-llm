@@ -6,7 +6,7 @@ import { getNotebookById } from "../services/notebook.service";
 import { extractPdfText } from "../services/ingestion/pdf.service";
 import { extractUrlText } from "../services/ingestion/url.service";
 import { createDocumentChunks } from "../services/ingestion/chunk.service";
-import { extractYoutubeTranscript } from "../services/ingestion/youtube.service";
+import { extractYoutubeTranscript, describeTranscriptFailure } from "../services/ingestion/youtube.service";
 import { indexDocumentChunks } from "../services/vector/vector.service";
 import { assertOwner } from "../services/authorization.service";
 import {
@@ -500,7 +500,7 @@ export async function uploadYoutubeController(
       });
     }
 
-    const transcript = await extractYoutubeTranscript(url);
+    const transcript = await extractYoutubeTranscript(url, userId);
 
     if (!transcript.content.trim()) {
       return res.status(400).json({
@@ -539,6 +539,17 @@ export async function uploadYoutubeController(
       status: "COMPLETED",
     });
   } catch (error) {
+    /*
+     * A video we cannot read a transcript from is not a server fault, so the
+     * specific reason is reported instead of a blanket 500. `null` means the
+     * failure was not one we recognise, which is the only case logged.
+     */
+    const failure = describeTranscriptFailure(error);
+
+    if (failure) {
+      return res.status(failure.status).json({ error: failure.error });
+    }
+
     console.error("YOUTUBE INGESTION ERROR:", error);
 
     return res.status(500).json({
