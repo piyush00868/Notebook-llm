@@ -4,6 +4,7 @@ import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
 import userRoutes from "./routes/user.routes";
+import authRoutes from "./routes/auth.routes";
 import workspaceRoutes from "./routes/workspace.routes";
 import notebookRoutes from "./routes/notebook.routes";
 import documentRoutes from "./routes/document.routes";
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use(clerkMiddleware());
 
 app.use("/users", userRoutes);
+app.use("/auth", authRoutes);
 app.use("/workspaces", workspaceRoutes);
 app.use("/notebooks", notebookRoutes);
 app.use("/documents", documentRoutes);
